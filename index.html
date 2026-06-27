@@ -122,8 +122,11 @@ shake 0.5s; }
 
         <label class="item-label"><input type="checkbox" checked value="バヤリース オレンジ"> バヤリース オレンジ</label>
         <label class="item-label"><input type="checkbox" checked value="Qoo りんご"> Qoo りんご</label>
-
-
+    </div>
+    <div style="text-align: center; margin: 10px 0;">
+        <label style="font-weight: bold; color: #555; cursor: pointer;">
+            <input type="checkbox" id="sound-off-checkbox"> SOUND OFF
+        </label>
     </div>
 </div>
 
@@ -236,6 +239,12 @@ confetti({
 
 let audioCtx;
         function playSound(type) {
+
+            if (document.getElementById('sound-off-checkbox').checked) {
+                return;
+            }
+
+
             if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             let osc = audioCtx.createOscillator();
             let gain = audioCtx.createGain();
