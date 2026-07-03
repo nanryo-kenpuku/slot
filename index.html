@@ -1,112 +1,235 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ドリンク・スロット</title>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
+        /* 全体の背景：空のような明るい水色から薄い黄色へのグラデーション */
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Arial Black', sans-serif;
+            background: linear-gradient(135deg, #fff9c4, #b3e5fc);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 15px;
+            box-sizing: border-box;
+        }
 
-/* 全体の背景：空のような明るい水色から薄い黄色へのグラデーション */
-        body { 
-            margin: 0; min-height: 100vh; font-family: 'Arial Black', sans-serif; 
-            background: linear-gradient(135deg, #fff9c4, #b3e5fc); 
-            display: flex; align-items: center; justify-content: center; padding: 15px; box-sizing: border-box; 
-        }
-        
         /* コンテナ：角丸で、おもちゃ箱のような温かい雰囲気 */
-        .container { 
-            background: #ffffff; padding: 25px; border-radius: 35px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15); text-align: center; width: 100%; max-width: 500px; 
-            border: 6px solid #ffeb3b; /* 明るい黄色の縁取り */
+        .container {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 35px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+            border: 6px solid #ffeb3b;
+            /* 明るい黄色の縁取り */
         }
-        
-        h1 { color: #f57c00; font-size: 26px; margin: 5px 0; text-shadow: 1px 1px #fff; }
+
+        h1 {
+            color: #f57c00;
+            font-size: 32px;
+            margin: 5px 0;
+            text-shadow: 1px 1px #fff;
+        }
 
         /* スロット窓：ワクワクするオレンジベース */
-        #slot-display { 
-            background: #fff3e0; color: #e65100; font-size: 30px; font-weight: bold; 
-            height: 120px; display: flex; align-items: center; justify-content: center; 
-            border: 6px solid #ffb74d; border-radius: 25px; margin: 20px 0;
-            box-shadow: inset 0 4px 0 rgba(255,255,255,0.5);
+        #slot-display {
+            background: #fff3e0;
+            color: #e65100;
+            font-size: 30px;
+            font-weight: bold;
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 6px solid #ffb74d;
+            border-radius: 25px;
+            margin: 20px 0;
+            box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.5);
         }
 
         /* 楽しいボタン：クリックしたくなる立体感 */
-        .btn { 
-            cursor: pointer; border: none; font-weight: bold; border-radius: 50px; 
-            padding: 20px; width: 100%; font-size: 24px; color: white;
-            box-shadow: 0 8px #d84315; transition: transform 0.1s;
+        .btn {
+            cursor: pointer;
+            border: none;
+            font-weight: bold;
+            border-radius: 50px;
+            padding: 20px;
+            width: 100%;
+            font-size: 24px;
+            color: white;
+            box-shadow: 0 8px #d84315;
+            transition: transform 0.1s;
         }
-        #main-btn { background-color: #ff9800; }
-        #main-btn:active { transform: translateY(4px); box-shadow: 0 4px #d84315; }
-        .stop-style { background-color: #f44336 !important; box-shadow: 0 8px #b71c1c !important; }
 
-        #hit-btn { background-color: #FF69B4; }
+        #main-btn {
+            background-color: #ff9800;
+        }
 
+        #main-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px #d84315;
+        }
+
+        .stop-style {
+            background-color: #f44336 !important;
+            box-shadow: 0 8px #b71c1c !important;
+        }
+
+        #hit-btn {
+            background-color: #FF69B4;
+        }
 
         /* チェックリスト：水色ベースで整理されたデザイン */
-        #checkbox-list { 
-            text-align: left; margin-top: 20px; max-height: 300px; overflow-y: auto; 
-            background: #e1f5fe; padding: 15px; border-radius: 25px; border: 3px solid #b3e5fc;
+        #checkbox-list {
+            text-align: left;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            background: #e1f5fe;
+            padding: 15px;
+            border-radius: 25px;
+            border: 3px solid #b3e5fc;
         }
-        .item-label { 
-            display: flex; align-items: center; padding: 12px; margin-bottom: 8px;
-            background: #ffffff; border-radius: 15px; cursor: pointer; 
-            font-size: 18px; color: #0277bd; font-weight: bold;
+
+        /* チェックリスト：設定 */
+        .checkbox-setting {
+            text-align: left;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            background: #e1f5fe;
+            padding: 15px;
+            border-radius: 25px;
+            border: 3px solid #b3e5fc;
         }
-        .item-label input { accent-color: #03a9f4; transform: scale(1.6); margin-right: 15px; }
 
+        .item-label {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            margin-bottom: 8px;
+            background: #ffffff;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 18px;
+            color: #0277bd;
+            font-weight: bold;
+        }
 
-/* 大当たり用オーバーレイのスタイル */
-  #overlay {
-    display: none; /* 初期状態は非表示 */
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw; height: 100vh;
-    background: rgba(0, 0, 0, 0.8); /* 半透明の黒 */
-    color: white;
-    font-size: 10vw; /* 画面幅に応じたサイズ */
-    font-weight: bold;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    cursor: pointer;
-  }
+        .item-label input {
+            accent-color: #03a9f4;
+            transform: scale(1.6);
+            margin-right: 15px;
+        }
+
+        /* 大当たり用オーバーレイのスタイル */
+        #overlay {
+            display: none;
+            /* 初期状態は非表示 */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.8);
+            /* 半透明の黒 */
+            color: white;
+            font-size: 10vw;
+            /* 画面幅に応じたサイズ */
+            font-weight: bold;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            cursor: pointer;
+        }
+
+        /* 商品一覧 */
+        details {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        summary {
+            cursor: pointer;
+            list-style: none;
+            font-size: 22px;
+            font-weight: bold;
+            color: #0277bd;
+            background: #e3f2fd;
+            padding: 14px 20px;
+            border-radius: 20px;
+            border: 3px solid #81d4fa;
+            user-select: none;
+            text-align: center;
+        }
+
+        summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details {
+            margin-top: 150px;
+            text-align: left;
+
+        }
+
+        details[open] summary {
+
+            margin-bottom: 10px;
+        }
 
     </style>
 </head>
+
 <body>
 
-<div class="container">
-    <label style="font-weight: bold; color: #555; cursor: pointer; font-size: 32px;">
-        横浜南陵高校<br/>健康福祉グループ
-    </label>
-    <h1>ドリンク・スロット</h1>
+    <div class="container">
+<img src="./emblem.jpg" width="30%" height="30%">
+<br/>
+        <label style="font-weight: bold; color: #555; cursor: pointer; font-size: 32px;">
+            横浜南陵高校<br />健康福祉グループ
+        </label>
+        <h1>ドリンク・スロット</h1>
 
-　<div id="overlay"><button id="hit-btn" class="btn" onclick="closeButton()">大当たり！</button></div>
+        　<div id="overlay"><button id="hit-btn" class="btn" onclick="closeButton()">大当たり！</button></div>
 
-    <div id="slot-display">READY?</div>
-    <button id="main-btn" class="btn" onclick="toggleSlot()">スタート！</button>
+        <div id="slot-display">READY?</div>
+        <button id="main-btn" class="btn" onclick="toggleSlot()">スタート！</button>
 
-    <div id="checkbox-list">
-        <label class="item-label"><input type="checkbox" checked value="コカ・コーラ"> コカ・コーラ</label>
-        <label class="item-label"><input type="checkbox" checked value="キリンレモン"> キリンレモン</label>
 
-        <label class="item-label"><input type="checkbox" checked value="カルピスウォーター"> カルピスウォーター</label>
 
-        <label class="item-label"><input type="checkbox" checked value="ファンタ グレープ"> ファンタ グレープ</label>
-        <label class="item-label"><input type="checkbox" checked value="ファンタ オレンジ"> ファンタ オレンジ</label>
+        <details id="drink-list">
+            <summary id="drink-summary">▼ 設定を表示</summary>
 
-        <label class="item-label"><input type="checkbox" checked value="午後の紅茶レモン"> 午後の紅茶 レモン</label>
-        <label class="item-label"><input type="checkbox" checked value="午後の紅茶ミルクティー"> 午後の紅茶ミルクティー</label>
+            <div id="checkbox-list">
+                <label class="item-label"><input type="checkbox" checked value="コカ・コーラ"> コカ・コーラ</label>
+                <label class="item-label"><input type="checkbox" checked value="キリンレモン"> キリンレモン</label>
 
-        <label class="item-label"><input type="checkbox" checked value="おーいお茶緑茶"> おーいお茶緑茶</label>
-        <label class="item-label"><input type="checkbox" checked value="ミネラルむぎ茶"> ミネラルむぎ茶</label>
+                <label class="item-label"><input type="checkbox" checked value="カルピスウォーター"> カルピスウォーター</label>
 
-        <label class="item-label"><input type="checkbox" checked value="バヤリース オレンジ"> バヤリース オレンジ</label>
-        <label class="item-label"><input type="checkbox" checked value="Qoo りんご"> Qoo りんご</label>
-    </div>
-<!--
+                <label class="item-label"><input type="checkbox" checked value="ファンタ グレープ"> ファンタ グレープ</label>
+                <label class="item-label"><input type="checkbox" checked value="ファンタ オレンジ"> ファンタ オレンジ</label>
+
+                <label class="item-label"><input type="checkbox" checked value="午後の紅茶レモン"> 午後の紅茶 レモン</label>
+                <label class="item-label"><input type="checkbox" checked value="午後の紅茶ミルクティー"> 午後の紅茶ミルクティー</label>
+
+                <label class="item-label"><input type="checkbox" checked value="おーいお茶緑茶"> おーいお茶緑茶</label>
+                <label class="item-label"><input type="checkbox" checked value="ミネラルむぎ茶"> ミネラルむぎ茶</label>
+
+                <label class="item-label"><input type="checkbox" checked value="バヤリース オレンジ"> バヤリース オレンジ</label>
+                <label class="item-label"><input type="checkbox" checked value="Qoo りんご"> Qoo りんご</label>
+            </div>
+
+            <!--
     <div style="text-align: center; margin: 10px 0;">
         <label style="font-weight: bold; color: #555; cursor: pointer;">
             <input type="checkbox" id="sound-off-checkbox" checked> SOUND OFF
@@ -117,130 +240,132 @@
         </label>
     </div>
 -->
-<!-- 修正後のチェックボックス配置部分 -->
-<div style="display: flex; flex-direction: column; align-items: flex-start; margin: 10px auto; width: fit-content;">
-        <label style="font-weight: bold; color: #555; cursor: pointer; display: flex; align-items: center; margin-bottom: 5px;">
-            <input type="checkbox" id="sound-off-checkbox" checked style="margin-right: 10px;"> SOUND OFF
-        </label>
-        <label style="font-weight: bold; color: #555; cursor: pointer; display: flex; align-items: center;">
-            <input type="checkbox" id="jackpot-checkbox" checked style="margin-right: 10px;"> 当選あり
-        </label>
+            <!-- 修正後のチェックボックス配置部分 -->
+            <div class="checkbox-setting">
+                <label class="item-label">
+                    <input type="checkbox" id="sound-off-checkbox" checked style="margin-right: 10px;"> SOUND OFF
+                </label>
+                <label class="item-label">
+                    <input type="checkbox" id="jackpot-checkbox" checked style="margin-right: 10px;"> 当選あり
+                </label>
+            </div>
     </div>
-</div>
-
-<script>
-    let isSpinning = false;
-    let slotInterval;
-    const hitMath = 0.2;
+    </details>
 
 
-
-    function toggleSlot() {
-        const mainBtn = document.getElementById('main-btn');
-//        const selectedItems = Array.from(document.querySelectorAll('input:checked')).map(i => i.value);
-          const selectedItems =  Array.from(document.querySelectorAll('#checkbox-list input:checked'))
-         .map(i => i.value);
-
-        if (selectedItems.length === 0) {
-            alert("リストから少なくとも1つ選択してください！");
-            return;
-        }
-
-        if (!isSpinning) {
-            isSpinning = true;
-            mainBtn.textContent = "ストップ！";
-
-//タップ音
-playSound('tick');
-
-            mainBtn.classList.add("stop-style");
-            
-            //slotInterval = setInterval(() => {
-            //    const randomIndex = Math.floor(Math.random() * selectedItems.length);
-            //    // ここを textContent から innerHTML に変更しました
-            //    document.getElementById('slot-display').innerHTML = selectedItems[randomIndex];
-            //}, 80);
+    <script>
+        let isSpinning = false;
+        let slotInterval;
+        const hitMath = 0.2;
 
 
 
-            slotInterval = setInterval(() => {
-                const randomIndex = Math.floor(Math.random() * selectedItems.length);
-                const item = selectedItems[randomIndex];
-                const display = document.getElementById('slot-display');
-                
-                // 表示内容を反映
-                display.innerHTML = item;
+        function toggleSlot() {
+            const mainBtn = document.getElementById('main-btn');
+            //        const selectedItems = Array.from(document.querySelectorAll('input:checked')).map(i => i.value);
+            const selectedItems = Array.from(document.querySelectorAll('#checkbox-list input:checked'))
+                .map(i => i.value);
 
-                // 【ここを追加】文字数に応じてサイズを変更
-                if (item.length > 10) {
-                    display.style.fontSize = "20px"; // 長い場合
-                } else if (item.length > 6) {
-                    display.style.fontSize = "25px"; // 普通の場合
-                } else {
-                    display.style.fontSize = "35px"; // 短い場合
+            if (selectedItems.length === 0) {
+                alert("リストから少なくとも1つ選択してください！");
+                return;
+            }
+
+            if (!isSpinning) {
+                isSpinning = true;
+                mainBtn.textContent = "ストップ！";
+
+                //タップ音
+                playSound('tick');
+
+                mainBtn.classList.add("stop-style");
+
+                //slotInterval = setInterval(() => {
+                //    const randomIndex = Math.floor(Math.random() * selectedItems.length);
+                //    // ここを textContent から innerHTML に変更しました
+                //    document.getElementById('slot-display').innerHTML = selectedItems[randomIndex];
+                //}, 80);
+
+
+
+                slotInterval = setInterval(() => {
+                    const randomIndex = Math.floor(Math.random() * selectedItems.length);
+                    const item = selectedItems[randomIndex];
+                    const display = document.getElementById('slot-display');
+
+                    // 表示内容を反映
+                    display.innerHTML = item;
+
+                    // 【ここを追加】文字数に応じてサイズを変更
+                    if (item.length > 10) {
+                        display.style.fontSize = "25px"; // 長い場合
+                    } else if (item.length > 6) {
+                        display.style.fontSize = "32px"; // 普通の場合
+                    } else {
+                        display.style.fontSize = "35px"; // 短い場合
+                    }
+
+
+
+                    //画面のシェイク（揺れ）
+                    //document.querySelector('.container').classList.add('shake');
+                    //setTimeout(() => {
+                    //    document.querySelector('.container').classList.remove('shake');
+                    //}, 500);
+
+
+                    //ルーレット音
+                    playSound('');
+
+                }, 80);//文字の変わるスピード
+
+
+            } else {
+                clearInterval(slotInterval);
+                isSpinning = false;
+                mainBtn.textContent = "スタート！";
+                mainBtn.classList.remove("stop-style");
+
+                if ((document.getElementById('jackpot-checkbox').checked && Math.random() < hitMath)) {
+                    // 大当たりの場合、オーバーレイを表示
+                    overlay.style.display = 'flex';
                 }
 
 
+                confetti({
+                    particleCount: 200, // 粒子を増やす
+                    spread: 100,        // 広がりを大きく
+                    origin: { y: 0.6 }
+                });
 
-//画面のシェイク（揺れ）
-//document.querySelector('.container').classList.add('shake');
-//setTimeout(() => {
-//    document.querySelector('.container').classList.remove('shake');
-//}, 500);
-
-
-//ルーレット音
-playSound('');
-
-         }, 80);//文字の変わるスピード
-
-
-        } else {
-            clearInterval(slotInterval);
-            isSpinning = false;
-            mainBtn.textContent = "スタート！";
-            mainBtn.classList.remove("stop-style");
-
-    if ((document.getElementById('jackpot-checkbox').checked && Math.random() < hitMath)) {
-      // 大当たりの場合、オーバーレイを表示
-      overlay.style.display = 'flex';
-    }
+                // 2. 左右から別の紙吹雪を追加（これを入れると非常に豪華になります）
+                confetti({
+                    particleCount: 50,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0, y: 0.6 } // 左下から
+                });
+                confetti({
+                    particleCount: 50,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1, y: 0.6 } // 右下から
+                });
 
 
-    confetti({
-        particleCount: 200, // 粒子を増やす
-        spread: 100,        // 広がりを大きく
-        origin: { y: 0.6 }
-    });
-
-    // 2. 左右から別の紙吹雪を追加（これを入れると非常に豪華になります）
-    confetti({
-        particleCount: 50,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0, y: 0.6 } // 左下から
-    });
-    confetti({
-        particleCount: 50,
-        angle: 120,
-        spread: 55,
-        origin: { x: 1, y: 0.6 } // 右下から
-    });
-
-
-confetti({
-    particleCount: 200,
-    shapes: ['square', 'circle', 'star', 'heart'], // これらをランダムに混ぜる
-    colors: ['#FFE400', '#FFBD00', '#E89400', '#FFCA6C', '#FDFFB8']
-});
+                confetti({
+                    particleCount: 200,
+                    shapes: ['square', 'circle', 'star', 'heart'], // これらをランダムに混ぜる
+                    colors: ['#FFE400', '#FFBD00', '#E89400', '#FFCA6C', '#FDFFB8']
+                });
 
 
 
-    }
+            }
 
-    }
+        }
 
-let audioCtx;
+        let audioCtx;
         function playSound(type) {
 
             if (document.getElementById('sound-off-checkbox').checked) {
@@ -252,23 +377,35 @@ let audioCtx;
             let osc = audioCtx.createOscillator();
             let gain = audioCtx.createGain();
             osc.connect(gain); gain.connect(audioCtx.destination);
-            if(type === 'tick') {
+            if (type === 'tick') {
                 osc.frequency.setValueAtTime(600, audioCtx.currentTime);
                 gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
                 osc.start(); osc.stop(audioCtx.currentTime + 0.05);
             } else {
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(523, audioCtx.currentTime);
-//osc.frequency.setValueAtTime(400 + (Math.random() * 400), audioCtx.currentTime);//リズム変化
+                //osc.frequency.setValueAtTime(400 + (Math.random() * 400), audioCtx.currentTime);//リズム変化
                 gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
                 osc.start(); osc.stop(audioCtx.currentTime + 0.5);
             }
         }
 
- function closeButton() {
-    overlay.style.display = 'none';
-  };
+        function closeButton() {
+            overlay.style.display = 'none';
+        };
 
-</script>
+
+        const drinkList = document.getElementById("drink-list");
+        const drinkSummary = document.getElementById("drink-summary");
+
+        drinkList.addEventListener("toggle", () => {
+            if (drinkList.open) {
+                drinkSummary.textContent = "▲ 設定を閉じる";
+            } else {
+                drinkSummary.textContent = "▼ 設定を表示";
+            }
+        });
+    </script>
 </body>
+
 </html>
