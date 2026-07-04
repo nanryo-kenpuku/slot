@@ -88,6 +88,12 @@
             background-color: #FF69B4;
         }
 
+        #hit-btn:active {
+            transform: translateY(8px); /* 押し込みを深く */
+            box-shadow: 0 2px #C2185B;
+        }
+
+
         /* チェックリスト：水色ベースで整理されたデザイン */
         #checkbox-list {
             text-align: left;
@@ -140,8 +146,10 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(0, 0, 0, 0.8);
-            /* 半透明の黒 */
+//            background: rgba(0, 0, 0, 0.8);
+            background-image: url('./1064898.jpg');
+            background-size: cover; /* 画像を画面全体にフィットさせる */
+            background-position: center; /* 画像を中央に配置 */
             color: white;
             font-size: 10vw;
             /* 画面幅に応じたサイズ */
@@ -187,6 +195,10 @@
             margin-bottom: 10px;
         }
 
+
+
+
+
     </style>
 </head>
 
@@ -200,14 +212,18 @@
         </label>
         <h1>ドリンク・スロット</h1>
 
-        　<div id="overlay"><button id="hit-btn" class="btn" onclick="closeButton()">大当たり！</button></div>
+        　<div id="overlay">
+            <div style="text-align: center;">
+                <button id="hit-btn" class="btn" onclick="closeButton()">&emsp;&emsp;大当たり！&emsp;&emsp;</button>
+            </div>
+        </div>
 
         <div id="slot-display">READY?</div>
         <button id="main-btn" class="btn" onclick="toggleSlot()">スタート！</button>
 
 
 
-        <details id="drink-list">
+        <details id="drink-list" onclick="return checkPassword(event)">
             <summary id="drink-summary">▼ 設定を表示</summary>
 
             <div id="checkbox-list">
@@ -229,24 +245,20 @@
                 <label class="item-label"><input type="checkbox" checked value="Qoo りんご"> Qoo りんご</label>
             </div>
 
-            <!--
-    <div style="text-align: center; margin: 10px 0;">
-        <label style="font-weight: bold; color: #555; cursor: pointer;">
-            <input type="checkbox" id="sound-off-checkbox" checked> SOUND OFF
-        </label>
-        <br/>
-        <label style="font-weight: bold; color: #555; cursor: pointer;">
-            <input type="checkbox" id="jackpot-checkbox" checked> 当選あり
-        </label>
-    </div>
--->
             <!-- 修正後のチェックボックス配置部分 -->
             <div class="checkbox-setting">
                 <label class="item-label">
                     <input type="checkbox" id="sound-off-checkbox" checked style="margin-right: 10px;"> SOUND OFF
                 </label>
                 <label class="item-label">
-                    <input type="checkbox" id="jackpot-checkbox" checked style="margin-right: 10px;"> 当選あり
+                    <input type="checkbox" id="jackpot-checkbox" checked style="margin-right: 10px;"> 
+                    <span>当選あり</span>
+                    <span style="margin-left: 15px; transform: scale(0.8);">
+                        <input type="number" id="hitpercent" value="10" min="0" max="100" size="3" style="width: 50px; padding: 5px; text-align: center;"> %
+                    </span>
+                </label>
+                <label class="item-label">
+                    <input type="checkbox" id="pw-on-checkbox" style="margin-right: 10px;"> パスワード設定
                 </label>
             </div>
     </div>
@@ -256,9 +268,6 @@
     <script>
         let isSpinning = false;
         let slotInterval;
-        const hitMath = 0.2;
-
-
 
         function toggleSlot() {
             const mainBtn = document.getElementById('main-btn');
@@ -326,14 +335,13 @@
                 mainBtn.textContent = "スタート！";
                 mainBtn.classList.remove("stop-style");
 
-                if ((document.getElementById('jackpot-checkbox').checked && Math.random() < hitMath)) {
+                if ((document.getElementById('jackpot-checkbox').checked && Math.random() < (document.getElementById('hitpercent').value / 100))) {
                     // 大当たりの場合、オーバーレイを表示
                     overlay.style.display = 'flex';
                 }
 
-
                 confetti({
-                    particleCount: 200, // 粒子を増やす
+                    particleCount: 100, // 粒子を増やす
                     spread: 100,        // 広がりを大きく
                     origin: { y: 0.6 }
                 });
@@ -342,14 +350,14 @@
                 confetti({
                     particleCount: 100,
                     angle: 60,
-                    scalar: 1.5,
+                    scalar: 1.2,        // 紙吹雪の大きさ
                     spread: 55,
                     origin: { x: 0, y: 0.6 } // 左下から
                 });
                 confetti({
                     particleCount: 100,
                     angle: 120,
-                    scalar: 1.5,
+                    scalar: 1.2,        // 紙吹雪の大きさ
                     spread: 55,
                     origin: { x: 1, y: 0.6 } // 右下から
                 });
@@ -357,16 +365,13 @@
 
                 confetti({
                     particleCount: 200,
-                    scalar: 1.5,
+                    scalar: 1.2,        // 紙吹雪の大きさ
                     spread: 100,        // 広がりを大きく
                     shapes: ['square', 'circle', 'star', 'heart'], // これらをランダムに混ぜる
                     colors: ['#FFE400', '#FFBD00', '#E89400', '#FFCA6C', '#FDFFB8']
                 });
 
-
-
             }
-
         }
 
         let audioCtx;
@@ -409,6 +414,36 @@
                 drinkSummary.textContent = "▼ 設定を表示";
             }
         });
+
+
+const PASSWORD = "1234"; // ←好きなパスワードに変更
+
+let authenticated = false;
+
+function checkPassword(event) {
+
+    // 閉じるときは認証不要
+    if (drinkList.open) {
+        return true;
+    }
+
+    if(!document.getElementById("pw-on-checkbox").checked){
+       return true;
+    }
+
+    event.preventDefault();
+
+    const pass = prompt("設定を開くにはパスワードを入力してください");
+
+    if (pass === PASSWORD) {
+        authenticated = true;
+        drinkList.open = true;
+    } else if (pass !== null) {
+        alert("パスワードが違います。");
+    }
+
+    return false;
+}
     </script>
 </body>
 
