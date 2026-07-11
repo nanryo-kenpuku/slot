@@ -74,7 +74,10 @@
             transition: transform 0.1s;
         }
 
-        /* ボタンが非活性（disabled）の時のスタイル */
+        .btn:active {
+            transform: translateY(4px);/*押されている風*/
+        }
+
         .btn:disabled {
             background-color: #bdbdbd !important;
             /* グレー */
@@ -239,8 +242,10 @@
                 ).always(function () {
                     hideLoading();
                     //選択画面表示
-                    document.getElementById('select-overlay').style.display = 'flex';
-                    // 追加：リロード時の状態チェック
+                    //document.getElementById('select-overlay').style.display = 'flex';
+                    //チケット受け取り
+                    document.getElementById('ticket-overlay').style.display = 'flex';
+                    // 状態チェック
                     blockButton();
                 });
             });
@@ -285,8 +290,8 @@
                 } else {
                     clearInterval(slotInterval);
                     isSpinning = false;
-                    //60秒×1000ミリ秒× もう一回の間隔分
-                    const endTime = Date.now() + (60000 * retrySpan);
+                    //もう一回の間隔（ミリ秒　×　指定時間）
+                    const endTime = Date.now() + (1000 * retrySpan);
                     localStorage.setItem('blockEndTime', endTime);
 
                     blockButton(); // ボタンを非活性化する関数へ
@@ -394,6 +399,11 @@
                     document.getElementById('select-overlay').style.display = 'none';
                 }
             }
+            function selectTicket() {
+                document.getElementById('ticket-overlay').style.display = 'none';
+                document.getElementById('select-overlay').style.display = 'flex';
+
+            }
 
             function blockButton() {
                 const mainBtn = document.getElementById('main-btn');
@@ -412,8 +422,8 @@
                     mainBtn.textContent = "スタート！";
                     mainBtn.classList.remove("stop-style");
                     localStorage.removeItem('blockEndTime'); // 不要になったので削除
-                    //ゼリードリンク選択画面を出す
-                    document.getElementById('select-overlay').style.display = 'flex';
+                    //チケット画面を出す
+                    document.getElementById('ticket-overlay').style.display = 'flex';
                 }
             }
         </script>
@@ -422,12 +432,19 @@
 <div id="select-overlay"
     style="display: flex; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; gap: 20px;">
     <h2 style="color:white;">どれにする？</h2>
-    <button class="btn" style="width: 200px; background: #4CAF50;box-shadow: 0 8px #686767;"
+    <button class="btn" style="width: 200px; background: #f385db;box-shadow: 0 8px #686767;"
         onclick="selectCategory('jelly')">ゼリー</button>
     <button class="btn" style="width: 200px; background: #2196F3;box-shadow: 0 8px #686767;"
         onclick="selectCategory('drink')">ペットボトル</button>
     <button class="btn" style="width: 200px; background: #FF9800;box-shadow: 0 8px #686767;"
-        onclick="selectCategory('all')">両方</button>
+        onclick="selectCategory('all')">ランダム</button>
+</div>
+<!-- ticket用オーバーレイ -->
+<div id="ticket-overlay"
+    style="display: flex; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; gap: 20px;">
+    <h2 style="color:white;">チケットを渡してね</h2>
+    <button class="btn" style="width: 200px; background: #4CAF50;box-shadow: 0 8px #686767;"
+        onclick="selectTicket()">チケット</button>
 </div>
 
 </html>
