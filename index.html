@@ -75,7 +75,8 @@
         }
 
         .btn:active {
-            transform: translateY(4px);/*押されている風*/
+            transform: translateY(4px);
+            /*押されている風*/
         }
 
         .btn:disabled {
@@ -192,7 +193,7 @@
 
         　<div id="overlay">
             <div style="text-align: center;">
-                <button id="hit-btn" class="btn" onclick="closeButton()"/>
+                <button id="hit-btn" class="btn" onclick="closeButton()" />
             </div>
         </div>
 
@@ -390,8 +391,16 @@
                     allItems = jellyAllItems;
                 } else if (type === 'drink') {
                     allItems = drinkAllItems;
+                } else {
+                    // 'all' の場合は何もしない（全件そのまま）
+                    allItems = [...drinkAllItems, ...jellyAllItems];
+                    // 2. allItems をランダムにシャッフルする（Fisher-Yatesシャッフル）
+                    for (let i = allItems.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [allItems[i], allItems[j]] = [allItems[j], allItems[i]];
+                    }
                 }
-                // 'all' の場合は何もしない（全件そのまま）
+
                 if (allItems.length === 0) {
                     alert("売り切れです。ごめんなさい！！");
                     return;
