@@ -175,6 +175,15 @@
                 transform: rotate(360deg);
             }
         }
+
+        #slider-knob:active {
+            transform: scale(0.9);
+            /* 押すと少し小さくなる[cite: 1] */
+            background-color: #388E3C !important;
+            /* 押すと色が少し暗くなる[cite: 1] */
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+            /* 押し込まれたような影[cite: 1] */
+        }
     </style>
 </head>
 <div id="loading">
@@ -386,13 +395,21 @@
             function selectCategory(type) {
 
                 const slotTitle = document.getElementById('slot-title');
+                const body = document.body; // body要素を取得
+                const container = document.querySelector('.container'); // containerを取得
 
                 if (type === 'jelly') {
                     slotTitle.textContent = "ゼリー・スロット";
                     allItems = jellyAllItems;
+                    //body.style.background = "linear-gradient(135deg, #fce4ec, #f8bbd0)"; // ピンク系
+                    body.style.background = "linear-gradient(135deg, #fce4ec, #f8bbd0)";
+                    container.style.borderColor = "#ff80ab"; // 鮮やかなピンクの縁
+
                 } else if (type === 'drink') {
                     slotTitle.textContent = "ドリンク・スロット";
                     allItems = drinkAllItems;
+                    body.style.background = "linear-gradient(135deg, #e3f2fd, #bbdefb)"; // ブルー系
+                    container.style.borderColor = "#64b5f6"; // 鮮やかなブルーの縁
                 } else {
                     // 'all' の場合
                     slotTitle.textContent = "ランダム・スロット";
@@ -401,6 +418,8 @@
                         const j = Math.floor(Math.random() * (i + 1));
                         [allItems[i], allItems[j]] = [allItems[j], allItems[i]];
                     }
+                    body.style.background = "linear-gradient(135deg, #fff9c4, #b3e5fc)"; // 元の黄色・水色
+                    container.style.borderColor = "#ffeb3b"; // 黄色い縁
                 }
 
                 if (allItems.length === 0) {
@@ -463,6 +482,9 @@
 
                     if (newLeft < 0) newLeft = 0;
                     if (newLeft > trackRect.width - 60) {
+
+                        playSound('tick');//音を鳴らす
+
                         newLeft = trackRect.width - 60;
                         selectTicket();
                         isDragging = false;
@@ -473,17 +495,39 @@
                 }
 
                 // イベントリスナーの登録
-                knob.addEventListener('mousedown', () => isDragging = true);
+                //knob.addEventListener('mousedown', () => isDragging = true);
+                knob.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    // バイブレーション（対応端末のみ）[cite: 1]
+                    if (navigator.vibrate) navigator.vibrate(50);
+                });
+
+
+
                 document.addEventListener('mousemove', (e) => handleMove(e.clientX));
                 document.addEventListener('mouseup', () => { isDragging = false; knob.style.left = '0px'; });
 
-                knob.addEventListener('touchstart', (e) => { isDragging = true; });
+                //knob.addEventListener('touchstart', (e) => { isDragging = true; });
+                // タッチ開始時の処理にも同様に追加します
+                knob.addEventListener('touchstart', (e) => {
+                    isDragging = true;
+                    // バイブレーション（対応端末のみ）[cite: 1]
+                    if (navigator.vibrate) navigator.vibrate(50);
+                });
+
+
                 document.addEventListener('touchmove', (e) => {
                     handleMove(e.touches[0].clientX);
                     e.preventDefault();
                 }, { passive: false });
                 document.addEventListener('touchend', () => { isDragging = false; knob.style.left = '0px'; });
             });
+            // スライダーを動かし始めたとき（mousedown/touchstart）
+            function triggerVibration() {
+                if (navigator.vibrate) {
+                    navigator.vibrate(50); // 50ミリ秒だけ振動させる
+                }
+            }
 
         </script>
 </body>
