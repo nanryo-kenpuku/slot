@@ -191,12 +191,19 @@
         </label>
         <h1 id="slot-title">ドリンク・スロット</h1>
 
+
+        <!-- overlayの中を以下のように修正 -->
         <div id="overlay">
             <div style="text-align: center;">
-                <!-- <h1 style="color:white;">お店の人に聞いてね</h1> -->
-                <button id="hit-btn" class="btn" onclick="closeButton()" />
+                <!-- 追加：メッセージ用の要素 -->
+                <p id="overlay-message"
+                    style="font-size: 24px; margin-bottom: 20px; color: #fff; text-shadow: 2px 2px 4px #000;">
+                    お店の人に見せてね
+                </p>
+                <button id="hit-btn" class="btn" onclick="closeButton()"></button>
             </div>
         </div>
+
         <div id="slot-display">READY?</div>
         <button id="main-btn" class="btn" onclick="toggleSlot()">スタート！</button>
 
@@ -435,6 +442,47 @@
                     }
                 }
             }
+
+            // スライダーの初期化をDOM構築完了後に実行する
+            window.addEventListener('DOMContentLoaded', (event) => {
+                const knob = document.getElementById('slider-knob');
+                const track = document.getElementById('slider-track');
+
+                // 要素が存在する場合のみ処理を行うようにチェックを入れる
+                if (!knob || !track) return;
+
+                let isDragging = false;
+
+                // 共通の移動処理関数
+                function handleMove(clientX) {
+                    if (!isDragging) return;
+                    const trackRect = track.getBoundingClientRect();
+                    let newLeft = clientX - trackRect.left - 30;
+
+                    if (newLeft < 0) newLeft = 0;
+                    if (newLeft > trackRect.width - 60) {
+                        newLeft = trackRect.width - 60;
+                        selectTicket();
+                        isDragging = false;
+                        knob.style.left = '0px';
+                        return;
+                    }
+                    knob.style.left = newLeft + 'px';
+                }
+
+                // イベントリスナーの登録
+                knob.addEventListener('mousedown', () => isDragging = true);
+                document.addEventListener('mousemove', (e) => handleMove(e.clientX));
+                document.addEventListener('mouseup', () => { isDragging = false; knob.style.left = '0px'; });
+
+                knob.addEventListener('touchstart', (e) => { isDragging = true; });
+                document.addEventListener('touchmove', (e) => {
+                    handleMove(e.touches[0].clientX);
+                    e.preventDefault();
+                }, { passive: false });
+                document.addEventListener('touchend', () => { isDragging = false; knob.style.left = '0px'; });
+            });
+
         </script>
 </body>
 <!-- 選択画面用オーバーレイ -->
@@ -449,11 +497,24 @@
         onclick="selectCategory('all')">ランダム</button>
 </div>
 <!-- ticket用オーバーレイ -->
-<div id="ticket-overlay"
+<!-- <div id="ticket-overlay"
     style="display: flex; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; gap: 20px;">
     <h2 style="color:white;">チケットを渡してね</h2>
     <button class="btn" style="width: 200px; background: #4CAF50;box-shadow: 0 8px #686767;"
         onclick="selectTicket()">チケット</button>
+</div> -->
+<div id="ticket-overlay"
+    style="display: flex; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; gap: 20px;">
+    <h2 style="color:white;">チケットを渡してね</h2>
+    <div id="slider-track"
+        style="width: 250px; height: 60px; background: #333; border-radius: 30px; position: relative; overflow: hidden; border: 2px solid #fff;">
+        <div id="slider-knob"
+            style="width: 60px; height: 60px; background: #4CAF50; border-radius: 50%; position: absolute; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+            ≫</div>
+        <span
+            style="position: absolute; width: 100%; text-align: center; line-height: 60px; color: #888; pointer-events: none;" />
+    </div>
 </div>
+
 
 </html>
