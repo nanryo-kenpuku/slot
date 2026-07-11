@@ -189,9 +189,9 @@
         <label style="font-weight: bold; color: #555; cursor: pointer; font-size: 32px;">
             横浜南陵高校<br />健康福祉グループ
         </label>
-        <h1>ドリンク・スロット</h1>
+        <h1 id="slot-title">ドリンク・スロット</h1>
 
-        　<div id="overlay">
+        <div id="overlay">
             <div style="text-align: center;">
                 <button id="hit-btn" class="btn" onclick="closeButton()" />
             </div>
@@ -341,14 +341,12 @@
                     });
 
 
-                    // ボタンを再度有効にする（10分後）
-                    setTimeout(() => {
-                        mainBtn.disabled = false;
-                        mainBtn.textContent = "スタート！";
-                        mainBtn.classList.remove("stop-style");
-                    }, 600000);//（1000ミリ秒 × 60秒 × 10分）
-
-
+                    // // ボタンを再度有効にする（10分後）
+                    // setTimeout(() => {
+                    //     mainBtn.disabled = false;
+                    //     mainBtn.textContent = "スタート！";
+                    //     mainBtn.classList.remove("stop-style");
+                    // }, 600000);//（1000ミリ秒 × 60秒 × 10分）
 
                 }
             }
@@ -387,12 +385,18 @@
                 $("#loading").hide();
             }
             function selectCategory(type) {
+
+                const slotTitle = document.getElementById('slot-title');
+
                 if (type === 'jelly') {
+                    slotTitle.textContent = "ゼリー・スロット";
                     allItems = jellyAllItems;
                 } else if (type === 'drink') {
+                    slotTitle.textContent = "ドリンク・スロット";
                     allItems = drinkAllItems;
                 } else {
                     // 'all' の場合
+                    slotTitle.textContent = "ランダム・スロット";
                     allItems = [...drinkAllItems, ...jellyAllItems];
                     for (let i = allItems.length - 1; i > 0; i--) {
                         const j = Math.floor(Math.random() * (i + 1));
@@ -433,7 +437,11 @@
                     mainBtn.classList.remove("stop-style");
                     localStorage.removeItem('blockEndTime'); // 不要になったので削除
                     //チケット画面を出す
-                    document.getElementById('ticket-overlay').style.display = 'flex';
+                    
+                    //あたり画面が出ていなかったら、チケット画面を出す
+                    if(document.getElementById('overlay').style.display == 'none'){
+                        document.getElementById('ticket-overlay').style.display = 'flex';
+                    }
                 }
             }
         </script>
