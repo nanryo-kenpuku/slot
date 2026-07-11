@@ -23,6 +23,14 @@
             box-sizing: border-box;
         }
 
+        @media screen and (max-width: 600px) {
+            body {
+                align-items: flex-start;
+                /* スマホの時だけ上に寄せる */
+                padding-top: 10px;
+            }
+        }
+
         /* コンテナ：角丸で、おもちゃ箱のような温かい雰囲気 */
         .container {
             background: #ffffff;
