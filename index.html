@@ -403,8 +403,7 @@
                 if (endTime && now < endTime) {
                     // まだ経過していない場合
                     mainBtn.disabled = true;
-                    mainBtn.textContent = "またチャレンジしてね(" + retrySpan + "分後)";
-
+                    mainBtn.textContent = "またチャレンジしてね";
                     // 残り時間後に再度チェックして有効化する
                     setTimeout(blockButton, endTime - now);
                 } else {
@@ -413,6 +412,8 @@
                     mainBtn.textContent = "スタート！";
                     mainBtn.classList.remove("stop-style");
                     localStorage.removeItem('blockEndTime'); // 不要になったので削除
+                    //ゼリードリンク選択画面を出す
+                    document.getElementById('select-overlay').style.display = 'flex';
                 }
             }
         </script>
