@@ -402,7 +402,7 @@
                 if (endTime && now < endTime) {
                     // まだ経過していない場合
                     mainBtn.disabled = true;
-                    mainBtn.textContent = retrySpan + "分後にチャレンジしてね...";
+                    mainBtn.textContent = "またチャレンジしてね(" + retrySpan + "分後)";
 
                     // 残り時間後に再度チェックして有効化する
                     setTimeout(blockButton, endTime - now);
