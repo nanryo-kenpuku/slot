@@ -23,14 +23,6 @@
             box-sizing: border-box;
         }
 
-        @media screen and (max-width: 600px) {
-            body {
-                align-items: flex-start;
-                /* スマホの時だけ上に寄せる */
-                padding-top: 10px;
-            }
-        }
-
         /* コンテナ：角丸で、おもちゃ箱のような温かい雰囲気 */
         .container {
             background: #ffffff;
@@ -51,12 +43,15 @@
                 padding: 5px;
                 /* 全体の余白を小さく */
             }
-
             .container {
                 max-width: 100%;
                 /* 最大幅を制限しない */
                 width: 95vw;
                 /* 画面幅の95%を使う */
+                /* 高さ一杯にする設定 */
+                min-height: calc(100vh - 50px);
+                /* 上下の余白(padding)分を引く */
+                box-sizing: border-box;
                 padding: 15px;
                 /* 内側の余白を少し詰める */
                 border-radius: 20px;
