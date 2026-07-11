@@ -261,6 +261,12 @@
 
             function toggleSlot() {
                 const mainBtn = document.getElementById('main-btn');
+                // 追加：ボタンが「もう一回チャレンジ」状態ならチケット画面へ戻す
+                if (mainBtn.textContent === "もう一回チャレンジ") {
+                    document.getElementById('ticket-overlay').style.display = 'flex';
+                    mainBtn.textContent = "スタート！"; // 次回のために戻しておく
+                    return;
+                }
 
                 if (!isSpinning) {
                     isSpinning = true;
@@ -310,14 +316,11 @@
                         document.getElementById('hit-btn').textContent = "おまけがもらえるよ";
                         overlay.style.display = 'flex';
                     }
-
                     confetti({
                         particleCount: 100, // 粒子を増やす
                         spread: 100,        // 広がりを大きく
                         origin: { y: 0.6 }
                     });
-
-                    // 2. 左右から別の紙吹雪を追加（これを入れると非常に豪華になります）
                     confetti({
                         particleCount: 100,
                         angle: 60,
@@ -332,8 +335,6 @@
                         spread: 55,
                         origin: { x: 1, y: 0.6 } // 右下から
                     });
-
-
                     confetti({
                         particleCount: 200,
                         scalar: 1.2,        // 紙吹雪の大きさ
@@ -435,14 +436,15 @@
                     mainBtn.classList.remove("stop-style");
                     localStorage.removeItem('blockEndTime'); // 不要になったので削除
                     //チケット画面を出す
-
-                    //あたり画面が出ていなかったら、チケット画面を出す
+                    //あたり画面が出ていなかったら、再チャレンジボタンにする
                     if (document.getElementById('overlay').style.display == 'none') {
-                        document.getElementById('ticket-overlay').style.display = 'flex';
+                        mainBtn.disabled = false;
+                        mainBtn.textContent = "もう一回チャレンジ";
+                        mainBtn.classList.remove("stop-style");
+
                     }
                 }
             }
-
             // スライダーの初期化をDOM構築完了後に実行する
             window.addEventListener('DOMContentLoaded', (event) => {
                 const knob = document.getElementById('slider-knob');
@@ -496,13 +498,6 @@
     <button class="btn" style="width: 200px; background: #FF9800;box-shadow: 0 8px #686767;"
         onclick="selectCategory('all')">ランダム</button>
 </div>
-<!-- ticket用オーバーレイ -->
-<!-- <div id="ticket-overlay"
-    style="display: flex; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; gap: 20px;">
-    <h2 style="color:white;">チケットを渡してね</h2>
-    <button class="btn" style="width: 200px; background: #4CAF50;box-shadow: 0 8px #686767;"
-        onclick="selectTicket()">チケット</button>
-</div> -->
 <div id="ticket-overlay"
     style="display: flex; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; gap: 20px;">
     <h2 style="color:white;">チケットを渡してね</h2>
