@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ドリンク・スロット</title>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
     <style>
         /* 全体の背景：空のような明るい水色から薄い黄色へのグラデーション */
         body {
@@ -24,6 +26,7 @@
         .container {
             background: #ffffff;
             padding: 25px;
+            padding-bottom: 100px;
             border-radius: 35px;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
             text-align: center;
@@ -70,6 +73,18 @@
             transition: transform 0.1s;
         }
 
+        /* ボタンが非活性（disabled）の時のスタイル */
+        .btn:disabled {
+            background-color: #bdbdbd !important;
+            /* グレー */
+            box-shadow: 0 8px #757575 !important;
+            /* 影も暗く */
+            cursor: not-allowed;
+            /* 禁止マークのカーソル */
+            transform: none;
+            /* 押し込みアニメーションを無効化 */
+        }
+
         #main-btn {
             background-color: #ff9800;
         }
@@ -89,52 +104,9 @@
         }
 
         #hit-btn:active {
-            transform: translateY(8px); /* 押し込みを深く */
+            transform: translateY(8px);
+            /* 押し込みを深く */
             box-shadow: 0 2px #C2185B;
-        }
-
-
-        /* チェックリスト：水色ベースで整理されたデザイン */
-        #checkbox-list {
-            text-align: left;
-            margin-top: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-            background: #e1f5fe;
-            padding: 15px;
-            border-radius: 25px;
-            border: 3px solid #b3e5fc;
-        }
-
-        /* チェックリスト：設定 */
-        .checkbox-setting {
-            text-align: left;
-            margin-top: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-            background: #e1f5fe;
-            padding: 15px;
-            border-radius: 25px;
-            border: 3px solid #b3e5fc;
-        }
-
-        .item-label {
-            display: flex;
-            align-items: center;
-            padding: 12px;
-            margin-bottom: 8px;
-            background: #ffffff;
-            border-radius: 15px;
-            cursor: pointer;
-            font-size: 18px;
-            color: #0277bd;
-            font-weight: bold;
-        }
-
-        .item-label input {
-            accent-color: #03a9f4;
-            transform: scale(1.6);
-            margin-right: 15px;
         }
 
         /* 大当たり用オーバーレイのスタイル */
@@ -146,10 +118,11 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-//            background: rgba(0, 0, 0, 0.8);
-            background-image: url('./1064898.jpg');
-            background-size: cover; /* 画像を画面全体にフィットさせる */
-            background-position: center; /* 画像を中央に配置 */
+
+            background-size: cover;
+            /* 画像を画面全体にフィットさせる */
+            background-position: center;
+            /* 画像を中央に配置 */
             color: white;
             font-size: 10vw;
             /* 画面幅に応じたサイズ */
@@ -160,53 +133,54 @@
             cursor: pointer;
         }
 
-        /* 商品一覧 */
-        details {
-            margin-top: 20px;
-            text-align: left;
+        .overlay-ooatari {
+            background-image: url('./1064898.jpg') !important;
         }
 
-        summary {
-            cursor: pointer;
-            list-style: none;
-            font-size: 22px;
-            font-weight: bold;
-            color: #0277bd;
-            background: #e3f2fd;
-            padding: 14px 20px;
-            border-radius: 20px;
-            border: 3px solid #81d4fa;
-            user-select: none;
-            text-align: center;
+        .overlay-omake {
+            background-image: none !important;
+            background: rgba(0, 0, 0, 0.9) !important;
+            /* グレー */
         }
 
-        summary::-webkit-details-marker {
+        /* ローディング画面 */
+        #loading {
             display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.7);
+            z-index: 9999;
+
+            justify-content: center;
+            align-items: center;
         }
 
-        details {
-            margin-top: 150px;
-            text-align: left;
-
+        /* クルクル */
+        .spinner {
+            width: 70px;
+            height: 70px;
+            border: 8px solid #E3F2FD;
+            border-top: 8px solid #2196F3;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
         }
 
-        details[open] summary {
-
-            margin-bottom: 10px;
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
-
-
-
-
-
     </style>
 </head>
+<div id="loading">
+    <div class="spinner"></div>
+</div>
 
 <body>
 
     <div class="container">
-<img src="./emblem.jpg" width="50%" height="50%">
-<br/>
+        <img src="./emblem.jpg" width="50%" height="50%">
+        <br />
         <label style="font-weight: bold; color: #555; cursor: pointer; font-size: 32px;">
             横浜南陵高校<br />健康福祉グループ
         </label>
@@ -214,237 +188,244 @@
 
         　<div id="overlay">
             <div style="text-align: center;">
-                <button id="hit-btn" class="btn" onclick="closeButton()">&emsp;&emsp;大当たり！&emsp;&emsp;</button>
+                <button id="hit-btn" class="btn" onclick="closeButton()"/>
             </div>
         </div>
 
         <div id="slot-display">READY?</div>
         <button id="main-btn" class="btn" onclick="toggleSlot()">スタート！</button>
 
+        <script>
+
+            let drinkAllItems = [];
+            let jellyAllItems = [];
+            let allItems = [];
+            let soundOff = [];
+            let retrySpan = [];
+            let ooatari = [];
+            let ooatariPercent = [];
+            let omake = [];
+            let omakePercent = [];
+
+            let selectedCategory = ''; // 選択されたカテゴリを保持
+
+            $(function () {
+                showLoading();//ローディング
+                $.getJSON(
+                    "https://slot-nanryo-default-rtdb.firebaseio.com/config.json",
+                    function (config) {
+
+                        //drinkAllItems = config.drinkEnabledItems;
+                        //jellyAllItems = config.jellyEnabledItems;
+                        drinkAllItems = (config.drinkEnabledItems || []).filter(item => item && item.length > 0);
+                        jellyAllItems = (config.jellyEnabledItems || []).filter(item => item && item.length > 0);
+
+                        // 1. 両方の配列を結合して allItems を作成
+                        allItems = [...drinkAllItems, ...jellyAllItems];
+                        // 2. allItems をランダムにシャッフルする（Fisher-Yatesシャッフル）
+                        for (let i = allItems.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [allItems[i], allItems[j]] = [allItems[j], allItems[i]];
+                        }
+                        soundOff = config.soundOff;
+                        retrySpan = config.retrySpan;
+                        ooatari = config.ooatari;
+                        ooatariPercent = config.ooatariPercent;
+                        omake = config.omake;
+                        omakePercent = config.omakePercent;
+
+                    }
+                ).always(function () {
+                    hideLoading();
+                    //選択画面表示
+                    document.getElementById('select-overlay').style.display = 'flex';
+                    // 追加：リロード時の状態チェック
+                    blockButton();
+                });
+            });
+
+            let isSpinning = false;
+            let slotInterval;
+
+            function toggleSlot() {
+                const mainBtn = document.getElementById('main-btn');
+
+                if (!isSpinning) {
+                    isSpinning = true;
+                    mainBtn.textContent = "ストップ！";
+
+                    //タップ音
+                    playSound('tick');
+                    mainBtn.classList.add("stop-style");
+
+                    slotInterval = setInterval(() => {
+                        const randomIndex = Math.floor(Math.random() * allItems.length);
+                        const item = allItems[randomIndex];
+                        const display = document.getElementById('slot-display');
+
+                        // 表示内容を反映
+                        display.innerHTML = item;
+
+                        // 【ここを追加】文字数に応じてサイズを変更
+                        if (item.length > 10) {
+                            display.style.fontSize = "25px"; // 長い場合
+                        } else if (item.length > 6) {
+                            display.style.fontSize = "32px"; // 普通の場合
+                        } else {
+                            display.style.fontSize = "35px"; // 短い場合
+                        }
+
+                        //ルーレット音
+                        playSound('');
+
+                    }, 80);//文字の変わるスピード
 
 
-        <details id="drink-list" onclick="return checkPassword(event)">
-            <summary id="drink-summary">▼ 設定を表示</summary>
+                } else {
+                    clearInterval(slotInterval);
+                    isSpinning = false;
+                    //60秒×1000ミリ秒× もう一回の間隔分
+                    const endTime = Date.now() + (60000 * retrySpan);
+                    localStorage.setItem('blockEndTime', endTime);
 
-            <div id="checkbox-list">
-                <label class="item-label"><input type="checkbox" checked value="コカ・コーラ"> コカ・コーラ</label>
-                <label class="item-label"><input type="checkbox" checked value="キリンレモン"> キリンレモン</label>
+                    blockButton(); // ボタンを非活性化する関数へ
 
-                <label class="item-label"><input type="checkbox" checked value="カルピスウォーター"> カルピスウォーター</label>
-
-                <label class="item-label"><input type="checkbox" checked value="ファンタ グレープ"> ファンタ グレープ</label>
-                <label class="item-label"><input type="checkbox" checked value="ファンタ オレンジ"> ファンタ オレンジ</label>
-
-                <label class="item-label"><input type="checkbox" checked value="午後の紅茶レモン"> 午後の紅茶 レモン</label>
-                <label class="item-label"><input type="checkbox" checked value="午後の紅茶ミルクティー"> 午後の紅茶ミルクティー</label>
-
-                <label class="item-label"><input type="checkbox" checked value="おーいお茶緑茶"> おーいお茶緑茶</label>
-                <label class="item-label"><input type="checkbox" checked value="ミネラルむぎ茶"> ミネラルむぎ茶</label>
-
-                <label class="item-label"><input type="checkbox" checked value="バヤリース オレンジ"> バヤリース オレンジ</label>
-                <label class="item-label"><input type="checkbox" checked value="Qoo りんご"> Qoo りんご</label>
-            </div>
-
-            <!-- 修正後のチェックボックス配置部分 -->
-            <div class="checkbox-setting">
-                <label class="item-label">
-                    <input type="checkbox" id="sound-off-checkbox" checked style="margin-right: 10px;"> SOUND OFF
-                </label>
-                <label class="item-label">
-                    <input type="checkbox" id="jackpot-checkbox" checked style="margin-right: 10px;"> 
-                    <span>当選あり</span>
-                    <span style="margin-left: 15px; transform: scale(0.8);">
-                        <input type="number" id="hitpercent" value="10" min="0" max="100" size="3" style="width: 50px; padding: 5px; text-align: center;"> %
-                    </span>
-                </label>
-                <label class="item-label">
-                    <input type="checkbox" id="pw-on-checkbox" checked style="margin-right: 10px;"> パスワード設定
-                </label>
-            </div>
-    </div>
-    </details>
-
-
-    <script>
-        let isSpinning = false;
-        let slotInterval;
-
-        function toggleSlot() {
-            const mainBtn = document.getElementById('main-btn');
-            //        const selectedItems = Array.from(document.querySelectorAll('input:checked')).map(i => i.value);
-            const selectedItems = Array.from(document.querySelectorAll('#checkbox-list input:checked'))
-                .map(i => i.value);
-
-            if (selectedItems.length === 0) {
-                alert("リストから少なくとも1つ選択してください！");
-                return;
-            }
-
-            if (!isSpinning) {
-                isSpinning = true;
-                mainBtn.textContent = "ストップ！";
-
-                //タップ音
-                playSound('tick');
-
-                mainBtn.classList.add("stop-style");
-
-                //slotInterval = setInterval(() => {
-                //    const randomIndex = Math.floor(Math.random() * selectedItems.length);
-                //    // ここを textContent から innerHTML に変更しました
-                //    document.getElementById('slot-display').innerHTML = selectedItems[randomIndex];
-                //}, 80);
-
-
-
-                slotInterval = setInterval(() => {
-                    const randomIndex = Math.floor(Math.random() * selectedItems.length);
-                    const item = selectedItems[randomIndex];
-                    const display = document.getElementById('slot-display');
-
-                    // 表示内容を反映
-                    display.innerHTML = item;
-
-                    // 【ここを追加】文字数に応じてサイズを変更
-                    if (item.length > 10) {
-                        display.style.fontSize = "25px"; // 長い場合
-                    } else if (item.length > 6) {
-                        display.style.fontSize = "32px"; // 普通の場合
-                    } else {
-                        display.style.fontSize = "35px"; // 短い場合
+                    if ((ooatari == true && Math.random() < (ooatariPercent / 100))) {
+                        // 大当たりの場合、オーバーレイを表示
+                        overlay.className = 'overlay-ooatari'; // 背景キラキラ
+                        document.getElementById('hit-btn').textContent = "大当たり！！";
+                        overlay.style.display = 'flex';
+                    } else if ((omake == true && Math.random() < (omakePercent / 100))) {
+                        // おまけの場合、オーバーレイを表示
+                        overlay.className = 'overlay-omake'; // 背景グレー
+                        document.getElementById('hit-btn').textContent = "おまけがもらえるよ";
+                        overlay.style.display = 'flex';
                     }
 
+                    confetti({
+                        particleCount: 100, // 粒子を増やす
+                        spread: 100,        // 広がりを大きく
+                        origin: { y: 0.6 }
+                    });
+
+                    // 2. 左右から別の紙吹雪を追加（これを入れると非常に豪華になります）
+                    confetti({
+                        particleCount: 100,
+                        angle: 60,
+                        scalar: 1.2,        // 紙吹雪の大きさ
+                        spread: 55,
+                        origin: { x: 0, y: 0.6 } // 左下から
+                    });
+                    confetti({
+                        particleCount: 100,
+                        angle: 120,
+                        scalar: 1.2,        // 紙吹雪の大きさ
+                        spread: 55,
+                        origin: { x: 1, y: 0.6 } // 右下から
+                    });
 
 
-                    //画面のシェイク（揺れ）
-                    //document.querySelector('.container').classList.add('shake');
-                    //setTimeout(() => {
-                    //    document.querySelector('.container').classList.remove('shake');
-                    //}, 500);
+                    confetti({
+                        particleCount: 200,
+                        scalar: 1.2,        // 紙吹雪の大きさ
+                        spread: 100,        // 広がりを大きく
+                        shapes: ['square', 'circle', 'star', 'heart'], // これらをランダムに混ぜる
+                        colors: ['#FFE400', '#FFBD00', '#E89400', '#FFCA6C', '#FDFFB8']
+                    });
 
 
-                    //ルーレット音
-                    playSound('');
+                    // ボタンを再度有効にする（10分後）
+                    setTimeout(() => {
+                        mainBtn.disabled = false;
+                        mainBtn.textContent = "スタート！";
+                        mainBtn.classList.remove("stop-style");
+                    }, 600000);//（1000ミリ秒 × 60秒 × 10分）
 
-                }, 80);//文字の変わるスピード
 
 
-            } else {
-                clearInterval(slotInterval);
-                isSpinning = false;
-                mainBtn.textContent = "スタート！";
-                mainBtn.classList.remove("stop-style");
-
-                if ((document.getElementById('jackpot-checkbox').checked && Math.random() < (document.getElementById('hitpercent').value / 100))) {
-                    // 大当たりの場合、オーバーレイを表示
-                    overlay.style.display = 'flex';
                 }
-
-                confetti({
-                    particleCount: 100, // 粒子を増やす
-                    spread: 100,        // 広がりを大きく
-                    origin: { y: 0.6 }
-                });
-
-                // 2. 左右から別の紙吹雪を追加（これを入れると非常に豪華になります）
-                confetti({
-                    particleCount: 100,
-                    angle: 60,
-                    scalar: 1.2,        // 紙吹雪の大きさ
-                    spread: 55,
-                    origin: { x: 0, y: 0.6 } // 左下から
-                });
-                confetti({
-                    particleCount: 100,
-                    angle: 120,
-                    scalar: 1.2,        // 紙吹雪の大きさ
-                    spread: 55,
-                    origin: { x: 1, y: 0.6 } // 右下から
-                });
-
-
-                confetti({
-                    particleCount: 200,
-                    scalar: 1.2,        // 紙吹雪の大きさ
-                    spread: 100,        // 広がりを大きく
-                    shapes: ['square', 'circle', 'star', 'heart'], // これらをランダムに混ぜる
-                    colors: ['#FFE400', '#FFBD00', '#E89400', '#FFCA6C', '#FDFFB8']
-                });
-
-            }
-        }
-
-        let audioCtx;
-        function playSound(type) {
-
-            if (document.getElementById('sound-off-checkbox').checked) {
-                return;
             }
 
-
-            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            let osc = audioCtx.createOscillator();
-            let gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            if (type === 'tick') {
-                osc.frequency.setValueAtTime(600, audioCtx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.05);
-            } else {
-                osc.type = 'triangle';
-                osc.frequency.setValueAtTime(523, audioCtx.currentTime);
-                //osc.frequency.setValueAtTime(400 + (Math.random() * 400), audioCtx.currentTime);//リズム変化
-                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
-                osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+            let audioCtx;
+            function playSound(type) {
+                if (soundOff == true) {
+                    return;
+                }
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.connect(gain); gain.connect(audioCtx.destination);
+                if (type === 'tick') {
+                    osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+                } else {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523, audioCtx.currentTime);
+                    //osc.frequency.setValueAtTime(400 + (Math.random() * 400), audioCtx.currentTime);//リズム変化
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+                    osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+                }
             }
-        }
 
-        function closeButton() {
-            overlay.style.display = 'none';
-        };
+            function closeButton() {
+                overlay.style.display = 'none';
+            };
 
-
-        const drinkList = document.getElementById("drink-list");
-        const drinkSummary = document.getElementById("drink-summary");
-
-        drinkList.addEventListener("toggle", () => {
-            if (drinkList.open) {
-                drinkSummary.textContent = "▲ 設定を閉じる";
-            } else {
-                drinkSummary.textContent = "▼ 設定を表示";
+            function showLoading() {
+                $("#loading").css("display", "flex");
             }
-        });
 
+            function hideLoading() {
+                $("#loading").hide();
+            }
+            function selectCategory(type) {
+                if (type === 'jelly') {
+                    allItems = jellyAllItems;
+                } else if (type === 'drink') {
+                    allItems = drinkAllItems;
+                }
+                // 'all' の場合は何もしない（全件そのまま）
+                if (allItems.length === 0) {
+                    alert("売り切れです。ごめんなさい！！");
+                    return;
+                } else {
+                    document.getElementById('select-overlay').style.display = 'none';
+                }
+            }
 
-const PASSWORD = "1234"; // ←好きなパスワードに変更
+            function blockButton() {
+                const mainBtn = document.getElementById('main-btn');
+                const endTime = localStorage.getItem('blockEndTime');
+                const now = Date.now();
 
-let authenticated = false;
+                if (endTime && now < endTime) {
+                    // まだ経過していない場合
+                    mainBtn.disabled = true;
+                    mainBtn.textContent = retrySpan + "分後にチャレンジしてね...";
 
-function checkPassword(event) {
-
-    // 閉じるときは認証不要
-    if (drinkList.open) {
-        return true;
-    }
-
-    if(!document.getElementById("pw-on-checkbox").checked){
-       return true;
-    }
-
-    event.preventDefault();
-
-    const pass = prompt("設定を開くにはパスワードを入力してください");
-
-    if (pass === PASSWORD) {
-        authenticated = true;
-        drinkList.open = true;
-    } else if (pass !== null) {
-        alert("パスワードが違います。");
-    }
-
-    return false;
-}
-    </script>
+                    // 残り時間後に再度チェックして有効化する
+                    setTimeout(blockButton, endTime - now);
+                } else {
+                    // 経過している（またはタイマー設定がない）場合
+                    mainBtn.disabled = false;
+                    mainBtn.textContent = "スタート！";
+                    mainBtn.classList.remove("stop-style");
+                    localStorage.removeItem('blockEndTime'); // 不要になったので削除
+                }
+            }
+        </script>
 </body>
+<!-- 選択画面用オーバーレイ -->
+<div id="select-overlay"
+    style="display: flex; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; gap: 20px;">
+    <h2 style="color:white;">どれにする？</h2>
+    <button class="btn" style="width: 200px; background: #4CAF50;box-shadow: 0 8px #686767;"
+        onclick="selectCategory('jelly')">ゼリー</button>
+    <button class="btn" style="width: 200px; background: #2196F3;box-shadow: 0 8px #686767;"
+        onclick="selectCategory('drink')">ペットボトル</button>
+    <button class="btn" style="width: 200px; background: #FF9800;box-shadow: 0 8px #686767;"
+        onclick="selectCategory('all')">両方</button>
+</div>
 
 </html>
