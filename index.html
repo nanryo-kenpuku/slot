@@ -1,311 +1,453 @@
-<!DOCTYPE html>
-<html lang="ja">
+let drinkAllItems = [];
+let jellyAllItems = [];
+let allItems = [];
+let soundOff = [];
+let retrySpan = [];
+let ooatari = [];
+let ooatariPercent = [];
+let omake = [];
+let omakePercent = [];
+let isSpinning = false;
+let slotInterval;
+let audioCtx;
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ドリンク・スロット</title>
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
-    <script src="./slot.js"></script>
-    <link rel="icon" href="./favicon.png" type="image/x-icon">
-    <style>
-        /* 全体の背景：空のような明るい水色から薄い黄色へのグラデーション */
-        body {
-            margin: 0;
-            min-height: 100vh;
-            font-family: 'Arial Black', sans-serif;
-            /* background: linear-gradient(135deg, #fff9c4, #b3e5fc); */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 15px;
-            box-sizing: border-box;
-        }
+const jellyColors = [
+    "#F8BBD0",
+    "#F48FB1",
+    "#F06292",
+    "#EC407A",
+    "#CE93D8",
+    "#E1BEE7",
+    "#FFCDD2",
+    "#FCE4EC",
+    "#FF80AB",
+    "#F3E5F5"
+];
+const drinkColors = [
+    "#E3F2FD",
+    "#BBDEFB",
+    "#90CAF9",
+    "#64B5F6",
+    "#81D4FA",
+    "#80DEEA",
+    "#B2EBF2",
+    "#B2DFDB",
+    "#C8E6C9",
+    "#DCEDC8"
+];
+const randomColors = [
+    "#FFCDD2", // ピンク
+    "#F8BBD0", // ベビーピンク
+    "#F48FB1", // ローズ
+    "#FFE082", // ライトイエロー
+    "#FFF59D", // パステルイエロー
+    "#C5E1A5", // ライトグリーン
+    "#A5D6A7", // ミント
+    "#B2DFDB", // エメラルド
+    "#80DEEA", // アクア
+    "#81D4FA", // スカイブルー
+    "#90CAF9", // ライトブルー
+    "#BBDEFB", // アイスブルー
+    "#B39DDB", // ラベンダー
+    "#D1C4E9", // パープル
+    "#FFCCBC", // ピーチ
+    "#FFE0B2", // オレンジ
+    "#F5F5F5", // ホワイト
+    "#E0F7FA"  // シアンホワイト
+];
+$(function () {
+    //チケット選択画面
+    document.getElementById('ticket-overlay').style.display = 'flex';
+    blockButton('init');
 
-        /* コンテナ：角丸で、おもちゃ箱のような温かい雰囲気 */
-        .container {
-            background: #ffffff;
-            padding: 25px;
-            padding-bottom: 100px;
-            border-radius: 35px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
-            text-align: center;
-            width: 100%;
-            max-width: 500px;
-            border: 6px solid #ffeb3b;
-            /* 明るい黄色の縁取り */
-        }
+});
 
-        /* スマホ向けの調整 */
-        @media screen and (max-width: 600px) {
-            body {
-                padding: 5px;
-                /* 全体の余白を小さく */
+function toggleSlot() {
+    const mainBtn = document.getElementById('main-btn');
+    const slotDisplay = document.getElementById('slot-display');
+    // 追加：ボタンが「もう一回チャレンジ」状態ならチケット画面へ戻す
+    if (mainBtn.textContent === "もう一回チャレンジ") {
+        // チケット選択画面
+        document.getElementById('ticket-overlay').style.display = 'flex';
+        //ボタン制御
+        blockButton('init');
+        return;
+    }
+
+    if (!isSpinning) {
+        isSpinning = true;
+        //タップ音
+        playSound('tick');
+
+        //ボタン制御
+        blockButton('start');
+
+        slotInterval = setInterval(() => {
+            const randomIndex = Math.floor(Math.random() * allItems.length);
+            const item = allItems[randomIndex];
+            const display = document.getElementById('slot-display');
+
+            // 表示内容を反映
+            display.innerHTML = item;
+
+            if (item.length > 10) {
+                display.style.fontSize = "20px"; // 長い場合
+            } else if (item.length > 6) {
+                display.style.fontSize = "25px"; // 普通の場合
+            } else {
+                display.style.fontSize = "35px"; // 短い場合
             }
+            //ルーレット音
+            playSound('');
 
-            .container {
-                max-width: 100%;
-                /* 最大幅を制限しない */
-                width: 95vw;
-                /* 画面幅の95%を使う */
-                /* 高さ一杯にする設定 */
-                min-height: calc(100vh - 50px);
-                /* 上下の余白(padding)分を引く */
-                box-sizing: border-box;
-                padding: 15px;
-                /* 内側の余白を少し詰める */
-                border-radius: 20px;
-                /* 角丸を少し小さく */
-                border-width: 4px;
-                /* 枠線を少し細く */
+        }, 80);//文字の変わるスピード
+
+    } else {
+        clearInterval(slotInterval);
+        isSpinning = false;
+        //ボタン制御
+        blockButton('stop');
+
+        if ((ooatari == true && Math.random() < (ooatariPercent / 100))) {
+            // 大当たりの場合、
+            overlay.className = 'overlay-ooatari'; // 背景キラキラ
+            document.getElementById('hit-btn').textContent = "大当たり！！";
+            overlay.style.display = 'flex';
+
+            //設定画面で数値が見られるように
+            incrementCounter("ooatari");
+
+        } else if ((omake == true && Math.random() < (omakePercent / 100))) {
+            // おまけの場合、
+            overlay.className = 'overlay-omake'; // 背景グレー
+            document.getElementById('hit-btn').textContent = "おまけがもらえるよ";
+            overlay.style.display = 'flex';
+            //設定画面で数値が見られるように
+            incrementCounter("omake");
+        }
+        confetti({
+            particleCount: 100, // 粒子を増やす
+            spread: 100,        // 広がりを大きく
+            origin: { y: 0.6 }
+        });
+        confetti({
+            particleCount: 100,
+            angle: 60,
+            scalar: 1.2,        // 紙吹雪の大きさ
+            spread: 55,
+            origin: { x: 0, y: 0.6 } // 左下から
+        });
+        confetti({
+            particleCount: 100,
+            angle: 120,
+            scalar: 1.2,        // 紙吹雪の大きさ
+            spread: 55,
+            origin: { x: 1, y: 0.6 } // 右下から
+        });
+        confetti({
+            particleCount: 200,
+            scalar: 1.2,        // 紙吹雪の大きさ
+            spread: 100,        // 広がりを大きく
+            shapes: ['square', 'circle', 'star', 'heart'], // これらをランダムに混ぜる
+            colors: ['#FFE400', '#FFBD00', '#E89400', '#FFCA6C', '#FDFFB8']
+        });
+    }
+}
+
+
+function playSound(type) {
+    if (soundOff == true) {
+        return;
+    }
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let osc = audioCtx.createOscillator();
+    let gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    if (type === 'tick') {
+        osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.05);
+    } else {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523, audioCtx.currentTime);
+        //osc.frequency.setValueAtTime(400 + (Math.random() * 400), audioCtx.currentTime);//リズム変化
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.5);
+    }
+}
+
+function closeButton() {
+    //ボタン制御
+    blockButton(); // ボタンを非活性化する関数へ
+    overlay.style.display = 'none';
+};
+
+function selectCategory(type) {
+    const body = document.body; // body要素を取得
+    const container = document.querySelector('.container'); // containerを取得
+
+
+    const slotTitle = document.getElementById('slot-title');
+    const slotDisplay = document.getElementById('slot-display');
+    const mainBtn = document.getElementById('main-btn');
+
+    if (type === 'jelly') {
+        allItems = jellyAllItems;
+
+        slotTitle.textContent = "ゼリー・スロット";
+        slotTitle.style.color = "#d81b60"; // 濃いピンク
+        slotDisplay.style.borderColor = "#ff80ab"; // 鮮やかなピンクの枠
+        slotDisplay.style.color = "#d81b60";
+        slotDisplay.style.background = "#fff0f5";
+
+        mainBtn.style.backgroundColor = "#ff4081";
+        mainBtn.style.boxShadow = "0 8px #880e4f";
+
+        //body.style.background = "linear-gradient(135deg, #fce4ec, #f8bbd0)";
+        body.style.background = randomGradient(jellyColors);
+        container.style.borderColor = "#ff80ab"; // 鮮やかなピンクの縁
+        //container.style.borderColor =  jellyColors[Math.floor(Math.random() * jellyColors.length)];
+
+    } else if (type === 'drink') {
+        allItems = drinkAllItems;
+        slotTitle.textContent = "ドリンク・スロット";
+        slotTitle.style.color = "#0d47a1"; // 濃いブルー
+        slotDisplay.style.borderColor = "#64b5f6"; // 鮮やかなブルーの枠
+        slotDisplay.style.color = "#0d47a1";
+        slotDisplay.style.background = "#e3f2fd";
+
+        mainBtn.style.backgroundColor = "#2196f3";
+        mainBtn.style.boxShadow = "0 8px #0d47a1";
+
+        //body.style.background = "linear-gradient(135deg, #e3f2fd, #bbdefb)"; // ブルー系
+        body.style.background = randomGradient(drinkColors);
+        container.style.borderColor = "#64b5f6"; // 鮮やかなブルーの縁
+    } else {
+        // 'all' の場合
+
+        allItems = [...drinkAllItems, ...jellyAllItems];
+        for (let i = allItems.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [allItems[i], allItems[j]] = [allItems[j], allItems[i]];
+        }
+
+        slotTitle.textContent = "ランダム・スロット";
+        slotTitle.style.color = "#f57c00"; // 元のオレンジ
+        slotDisplay.style.borderColor = "#ffb74d"; // 元のオレンジの枠
+        slotDisplay.style.color = "#e65100";
+        slotDisplay.style.background = "#fff3e0";
+        // ボタンの配色（元のオレンジ系）
+        mainBtn.style.backgroundColor = "#ff9800";
+        mainBtn.style.boxShadow = "0 8px #d84315";
+
+        //body.style.background = "linear-gradient(135deg, #fff9c4, #b3e5fc)"; // 元の黄色・水色
+        body.style.background = randomGradient(randomColors);
+        container.style.borderColor = "#ffeb3b"; // 黄色い縁
+    }
+
+    if (allItems.length === 0) {
+        alert("売り切れです。ごめんなさい！！");
+        return;
+    } else {
+        const slotDisplay = document.getElementById('slot-display');
+        slotDisplay.textContent = "READY?";
+        document.getElementById('select-overlay').style.display = 'none';
+    }
+}
+function selectTicket() {
+    document.getElementById('ticket-overlay').style.display = 'none';
+    document.getElementById('select-overlay').style.display = 'flex';
+
+}
+
+function blockButton(type) {
+    const mainBtn = document.getElementById('main-btn');
+    const endTime = localStorage.getItem('blockEndTime');
+    const now = Date.now();
+
+    if (type === 'init') {
+        //データ取得
+        fetchLatestConfig();
+
+        if (endTime && now < endTime) {
+            // まだ経過していない場合
+            mainBtn.disabled = true;
+            mainBtn.textContent = "またチャレンジしてね";
+            // 残り時間後に再度チェックして有効化する
+            setTimeout(blockButton, endTime - now);
+
+        } else {
+            mainBtn.disabled = false;
+            mainBtn.classList.remove("stop-jelly", "stop-drink", "stop-random");
+            mainBtn.textContent = "スタート！";
+        }
+
+    } else if (type === 'start') {
+        mainBtn.textContent = "ストップ！";
+        //もう一回の間隔（ミリ秒　×　指定時間）
+        const endTime = Date.now() + (1000 * retrySpan);
+        localStorage.setItem('blockEndTime', endTime);
+
+        // 現在のカテゴリーに合わせてクラスを付与
+        const currentTitle = document.getElementById('slot-title').textContent;
+        if (currentTitle.includes("ゼリー")) {
+            mainBtn.classList.add("stop-jelly");
+        } else if (currentTitle.includes("ドリンク")) {
+            mainBtn.classList.add("stop-drink");
+        } else {
+            mainBtn.classList.add("stop-random");
+        }
+
+    } else if (type === 'stop') {
+        mainBtn.disabled = true;
+        mainBtn.textContent = "またチャレンジしてね";
+        //もう一回の間隔（ミリ秒　×　指定時間）
+        const endTime = Date.now() + (1000 * retrySpan);
+        localStorage.setItem('blockEndTime', endTime);
+        setTimeout(blockButton, endTime - now);
+    } else {
+
+        if (endTime && now < endTime) {
+            // まだ経過していない場合
+            mainBtn.disabled = true;
+            mainBtn.textContent = "またチャレンジしてね";
+            // 残り時間後に再度チェックして有効化する
+            setTimeout(blockButton, endTime - now);
+        } else {
+            // 経過している場合
+            localStorage.removeItem('blockEndTime'); // 不要になったので削除
+            mainBtn.classList.remove("stop-jelly", "stop-drink", "stop-random");
+
+            mainBtn.disabled = false;
+            mainBtn.textContent = "もう一回チャレンジ";
+        }
+    }
+}
+// スライダーの初期化をDOM構築完了後に実行する
+window.addEventListener('DOMContentLoaded', (event) => {
+    const knob = document.getElementById('slider-knob');
+    const track = document.getElementById('slider-track');
+
+    // 要素が存在する場合のみ処理を行うようにチェックを入れる
+    if (!knob || !track) return;
+
+    let isDragging = false;
+
+    // 共通の移動処理関数
+    function handleMove(clientX) {
+        if (!isDragging) return;
+        const trackRect = track.getBoundingClientRect();
+        let newLeft = clientX - trackRect.left - 30;
+
+        if (newLeft < 0) newLeft = 0;
+        if (newLeft > trackRect.width - 60) {
+
+            playSound('tick');//音を鳴らす
+            newLeft = trackRect.width - 60;
+            selectTicket();
+            isDragging = false;
+            knob.style.left = '0px';
+            return;
+        }
+        knob.style.left = newLeft + 'px';
+    }
+
+    // イベントリスナーの登録
+    //knob.addEventListener('mousedown', () => isDragging = true);
+    knob.addEventListener('mousedown', (e) => {
+        isDragging = true;
+        // バイブレーション（対応端末のみ）[cite: 1]
+        if (navigator.vibrate) navigator.vibrate(50);
+    });
+
+    document.addEventListener('mousemove', (e) => handleMove(e.clientX));
+    document.addEventListener('mouseup', () => { isDragging = false; knob.style.left = '0px'; });
+
+    //knob.addEventListener('touchstart', (e) => { isDragging = true; });
+    // タッチ開始時の処理にも同様に追加します
+    knob.addEventListener('touchstart', (e) => {
+        isDragging = true;
+        // バイブレーション（対応端末のみ）[cite: 1]
+        if (navigator.vibrate) navigator.vibrate(50);
+    });
+
+
+    document.addEventListener('touchmove', (e) => {
+        handleMove(e.touches[0].clientX);
+        e.preventDefault();
+    }, { passive: false });
+    document.addEventListener('touchend', () => { isDragging = false; knob.style.left = '0px'; });
+});
+// スライダーを動かし始めたとき（mousedown/touchstart）
+function triggerVibration() {
+    if (navigator.vibrate) {
+        navigator.vibrate(50); // 50ミリ秒だけ振動させる
+    }
+}
+// 最新のconfigを取得する関数
+function fetchLatestConfig() {
+
+    $("#loading").css("display", "flex");
+
+    $.getJSON(
+        "https://slot-nanryo-default-rtdb.firebaseio.com/config.json",
+        function (config) {
+
+            drinkAllItems = (config.drinkEnabledItems || []).filter(item => item && item.length > 0);
+            jellyAllItems = (config.jellyEnabledItems || []).filter(item => item && item.length > 0);
+
+            // 1. 両方の配列を結合して allItems を作成
+            allItems = [...drinkAllItems, ...jellyAllItems];
+            // 2. allItems をランダムにシャッフルする（Fisher-Yatesシャッフル）
+            for (let i = allItems.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [allItems[i], allItems[j]] = [allItems[j], allItems[i]];
             }
+            soundOff = config.soundOff;
+            retrySpan = config.retrySpan;
+            ooatari = config.ooatari;
+            ooatariPercent = config.ooatariPercent;
+            omake = config.omake;
+            omakePercent = config.omakePercent;
+
         }
+    ).always(function () {
+        $("#loading").hide();
+    });
+}
+function getToday() {
+    const now = new Date();
+    return now.getFullYear() + "-" +
+        String(now.getMonth() + 1).padStart(2, "0") + "-" +
+        String(now.getDate()).padStart(2, "0");
+}
+//カウントアップ関数
+function incrementCounter(type) {
 
-        h1 {
-            color: #f57c00;
-            font-size: 32px;
-            margin: 5px 0;
-            text-shadow: 1px 1px #fff;
+    const today = getToday();
+    const url = "https://slot-nanryo-default-rtdb.firebaseio.com/counter/" +
+        today + "/" + type + ".json";
+    $.get(url, function (count) {
+
+        if (count == null) {
+            count = 0;
         }
+        $.ajax({
+            url: url,
+            type: "PUT",
+            data: JSON.stringify(count + 1)
+        });
+    });
 
-        /* スロット窓：ワクワクするオレンジベース */
-        #slot-display {
-            background: #fff3e0;
-            color: #e65100;
-            font-size: 30px;
-            font-weight: bold;
-            height: 120px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 6px solid #ffb74d;
-            border-radius: 25px;
-            margin: 20px 0;
-            box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.5);
-            margin-top: 50px;
-            /*　上にさらに余裕を作る */
-        }
+}
+// ランダムな2色グラデーションを作成
+function randomGradient(colors) {
+    const color1 = colors[Math.floor(Math.random() * colors.length)];
+    let color2;
+    do {
+        color2 = colors[Math.floor(Math.random() * colors.length)];
+    } while (color1 === color2);
+    const angle = Math.floor(Math.random() * 360);
+    return `linear-gradient(${angle}deg, ${color1}, ${color2})`;
+}
 
-        /* 楽しいボタン：クリックしたくなる立体感 */
-        .btn {
-            cursor: pointer;
-            border: none;
-            font-weight: bold;
-            border-radius: 50px;
-            padding: 20px;
-            width: 100%;
-            font-size: 24px;
-            color: white;
-            box-shadow: 0 8px #d84315;
-            transition: transform 0.1s;
-        }
-
-        .btn:active {
-            transform: translateY(4px);
-            /*押されている風*/
-        }
-
-        .btn:disabled {
-            background-color: #bdbdbd !important;
-            /* グレー */
-            box-shadow: 0 8px #757575 !important;
-            /* 影も暗く */
-            cursor: not-allowed;
-            /* 禁止マークのカーソル */
-            transform: none;
-            /* 押し込みアニメーションを無効化 */
-        }
-
-        #main-btn {
-            /* background-color: #ff9800; */
-            margin-top: 20px;
-            /* ボタンの上にさらに余裕を作る */
-        }
-
-        #main-btn:active {
-            transform: translateY(4px);
-            box-shadow: 0 4px #d84315;
-        }
-
-        /* カテゴリー別のストップ配色 */
-        /* 濃いめのピンク（マゼンタ寄り） */
-        .stop-jelly {
-            background-color: #bd0c53 !important;
-            box-shadow: 0 8px #880e4f !important;
-        }
-
-        /* 濃いめのブルー（ネイビー寄り） */
-        .stop-drink {
-            background-color: #0f4583 !important;
-            box-shadow: 0 8px #051e42 !important;
-        }
-
-        /* ランダム（デフォルト） */
-        .stop-random {
-            background-color: #d32f2f !important;
-            box-shadow: 0 8px #b71c1c !important;
-        }
-
-        /* .stop-style {
-            background-color: #f44336 !important;
-            box-shadow: 0 8px #b71c1c !important;
-        } */
-
-        #hit-btn {
-            background-color: #FF69B4;
-        }
-
-        #hit-btn:active {
-            transform: translateY(8px);
-            /* 押し込みを深く */
-            box-shadow: 0 2px #C2185B;
-        }
-
-        /* 大当たり用オーバーレイのスタイル */
-        #overlay {
-            display: none;
-            /* 初期状態は非表示 */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-
-            background-size: cover;
-            /* 画像を画面全体にフィットさせる */
-            background-position: center;
-            /* 画像を中央に配置 */
-            color: white;
-            font-size: 10vw;
-            /* 画面幅に応じたサイズ */
-            font-weight: bold;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            cursor: pointer;
-        }
-
-        .overlay-ooatari {
-            background-image: url('./1064898.jpg') !important;
-        }
-
-        .overlay-omake {
-            background-image: none !important;
-            background: rgba(0, 0, 0, 0.9) !important;
-            /* グレー */
-        }
-
-        /* ローディング画面 */
-        #loading {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(255, 255, 255, 0.7);
-            z-index: 9999;
-
-            justify-content: center;
-            align-items: center;
-        }
-
-        /* クルクル */
-        .spinner {
-            width: 70px;
-            height: 70px;
-            border: 8px solid #E3F2FD;
-            border-top: 8px solid #2196F3;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        #slider-knob:active {
-            transform: scale(0.9);
-            /* 押すと少し小さくなる[cite: 1] */
-            background-color: #388E3C !important;
-            /* 押すと色が少し暗くなる[cite: 1] */
-            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
-            /* 押し込まれたような影[cite: 1] */
-        }
-        
-    </style>
-</head>
-<div id="loading">
-    <div class="spinner"></div>
-</div>
-
-<body>
-    <div class="container">
-        <img src="./emblem.jpg" width="50%" height="50%">
-        <br />
-        <div style="text-align:center; margin-bottom:20px;">
-    <div style="
-        color:#666;
-        font-size:18px;
-        letter-spacing:8px;
-        font-weight:bold;">
-        横浜南陵高校
-    </div>
-    <div style="
-        width:240px;
-        height:3px;
-        background:linear-gradient(to right,#29b6f6,#ff9800,#ff4081);
-        margin:10px auto 15px;
-        border-radius:3px;">
-    </div>
-    <div style="
-        font-size:42px;
-        font-weight:900;
-        letter-spacing:4px;
-        background:linear-gradient(90deg,#ff4081,#ff9800,#29b6f6);
-        -webkit-background-clip:text;
-        -webkit-text-fill-color:transparent;
-        text-shadow:2px 2px 8px rgba(0,0,0,0.2);">
-        健康福祉グループ
-    </div>
-</div>
-
-        <h1 id="slot-title">ドリンク・スロット</h1>
-        <div id="overlay">
-            <div style="text-align: center;">
-                <p id="overlay-message"
-                    style="font-size: 24px; margin-bottom: 20px; color: #fff; text-shadow: 2px 2px 4px #000;">
-                    お店の人に見せてね
-                </p>
-                <button id="hit-btn" class="btn" onclick="closeButton()"></button>
-            </div>
-        </div>
-
-        <div id="slot-display">READY?</div>
-        <button id="main-btn" class="btn" onclick="toggleSlot()">スタート！</button>
-</body>
-<!-- 選択画面用オーバーレイ -->
-<div id="select-overlay"
-    style="display: flex; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; gap: 20px;">
-    <h2 style="color:white;">どれにする？</h2>
-    <button class="btn" style="width: 200px; background: #f385db;box-shadow: 0 8px #686767;"
-        onclick="selectCategory('jelly')">ゼリー</button>
-    <button class="btn" style="width: 200px; background: #2196F3;box-shadow: 0 8px #686767;"
-        onclick="selectCategory('drink')">ペットボトル</button>
-    <button class="btn" style="width: 200px; background: #FF9800;box-shadow: 0 8px #686767;"
-        onclick="selectCategory('all')">ランダム</button>
-</div>
-<div id="ticket-overlay"
-    style="display: flex; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.95); z-index: 10000; flex-direction: column; justify-content: center; align-items: center; gap: 20px;">
-    <h2 style="color:white;">チケットを渡してね</h2>
-    <div id="slider-track"
-        style="width: 250px; height: 60px; background: #333; border-radius: 30px; position: relative; overflow: hidden; border: 2px solid #fff;">
-        <div id="slider-knob"
-            style="width: 60px; height: 60px; background: #4CAF50; border-radius: 50%; position: absolute; cursor: pointer; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
-            ≫</div>
-        <span
-            style="position: absolute; width: 100%; text-align: center; line-height: 60px; color: #888; pointer-events: none;" />
-    </div>
-</div>
-
-</html>
