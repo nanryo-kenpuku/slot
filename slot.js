@@ -108,6 +108,9 @@ function toggleSlot() {
         //ボタン制御
         blockButton('stop');
 
+        //あたり画面に商品名を出す
+        copySlotStyle();
+
         if ((ooatari == true && Math.random() < (ooatariPercent / 100))) {
             // 大当たりの場合、
             overlay.className = 'overlay-ooatari'; // 背景キラキラ
@@ -125,6 +128,7 @@ function toggleSlot() {
             //設定画面で数値が見られるように
             incrementCounter("omake");
         }
+
         confetti({
             particleCount: 100, // 粒子を増やす
             spread: 100,        // 広がりを大きく
@@ -450,4 +454,23 @@ function randomGradient(colors) {
     const angle = Math.floor(Math.random() * 360);
     return `linear-gradient(${angle}deg, ${color1}, ${color2})`;
 }
+function copySlotStyle() {
+    const original = document.getElementById('slot-display');
+    const target = document.getElementById('result-display');
+    const computedStyle = window.getComputedStyle(original);
 
+    // 1. 文字（中身）をコピー
+    target.innerText = original.innerText;
+
+    // 2. スタイルをすべてコピー
+    target.style.backgroundColor = computedStyle.backgroundColor;
+    target.style.color = computedStyle.color;
+    target.style.borderColor = computedStyle.borderColor;
+    target.style.boxShadow = computedStyle.boxShadow;
+    
+    // 【追加】フォントサイズもコピー
+    target.style.fontSize = computedStyle.fontSize;
+    
+    // 必要に応じて高さや余白も合わせる場合
+    target.style.height = computedStyle.height;
+}
